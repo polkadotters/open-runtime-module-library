@@ -12,6 +12,8 @@ members = [
 	"vesting",
 	"rewards",
 	"nft",
+	"xcm-support",
+	"xtokens"
 ]
 
 [patch.crates-io]
