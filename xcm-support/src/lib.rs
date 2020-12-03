@@ -50,7 +50,7 @@ impl<
 	fn deposit_asset(asset: &MultiAsset, location: &MultiLocation) -> Result {
 		let who = AccountIdConverter::from_location(location).ok_or(())?;
 		let currency_id = CurrencyIdConverter::from_asset(asset).ok_or(())?;
-		let amount: MultiCurrency::Balance = Matcher::matches_fungible(&asset).ok_or(())?.saturated_into();
+		let amount: u128 = Matcher::matches_fungible(&asset).ok_or(())?.saturated_into();
 		let balance_amount = amount.try_into().map_err(|_| ())?;
 		MultiCurrency::deposit(currency_id, &who, balance_amount).map_err(|_| ())?;
 
@@ -62,7 +62,7 @@ impl<
 	fn withdraw_asset(asset: &MultiAsset, location: &MultiLocation) -> result::Result<MultiAsset, Error> {
 		let who = AccountIdConverter::from_location(location).ok_or(())?;
 		let currency_id = CurrencyIdConverter::from_asset(asset).ok_or(())?;
-		let amount: MultiCurrency::Balance = Matcher::matches_fungible(&asset).ok_or(())?.saturated_into();
+		let amount: u128 = Matcher::matches_fungible(&asset).ok_or(())?.saturated_into();
 		let balance_amount = amount.try_into().map_err(|_| ())?;
 		MultiCurrency::withdraw(currency_id, &who, balance_amount).map_err(|_| ())?;
 

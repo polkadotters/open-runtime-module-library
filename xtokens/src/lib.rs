@@ -145,7 +145,7 @@ impl<T: Trait> Module<T> {
 		Xcm::WithdrawAsset {
 			assets: vec![MultiAsset::ConcreteFungible {
 				id: MultiLocation::X1(Junction::Parent),
-				amount: T::ToRelayChainBalance::convert(amount).into(),
+				amount: T::ToRelayChainBalance::convert(amount),
 			}],
 			effects: vec![Order::InitiateReserveWithdraw {
 				assets: vec![MultiAsset::All],
@@ -196,7 +196,7 @@ impl<T: Trait> Module<T> {
 		Xcm::WithdrawAsset {
 			assets: vec![MultiAsset::ConcreteFungible {
 				id: MultiLocation::X1(Junction::Parent),
-				amount: T::ToRelayChainBalance::convert(amount).into(),
+				amount: T::ToRelayChainBalance::convert(amount),
 			}],
 			effects: vec![Order::InitiateReserveWithdraw {
 				assets: vec![MultiAsset::All],
