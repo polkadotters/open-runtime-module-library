@@ -1,7 +1,7 @@
 [package]
 name = "orml-xtokens"
 description = "Crosschain token transfer"
-repository = "https://github.com/open-web3-stack/open-runtime-module-library/tree/master/tokens"
+repository = "https://github.com/open-web3-stack/open-runtime-module-library/tree/master/xtokens"
 license = "Apache-2.0"
 version = "0.3.3-dev"
 authors = ["Acala Developers"]
@@ -20,9 +20,9 @@ frame-system = { version = "2.0.0", default-features = false }
 orml-utilities = { path = "../utilities", version = "0.3.3-dev", default-features = false }
 orml-xcm-support = { path = "../xcm-support", version = "0.3.3-dev", default-features = false }
 
-cumulus-primitives = { git = "https://github.com/paritytech/cumulus", branch = "master", default-features = false }
+cumulus-primitives = { git = "https://github.com/paritytech/cumulus", default-features = false }
 
-xcm = { git = "https://github.com/paritytech/polkadot", branch = "master", default-features = false }
+xcm = { git = "https://github.com/paritytech/polkadot", default-features = false }
 
 [features]
 default = ["std"]
@@ -37,4 +37,5 @@ std = [
 	"orml-utilities/std",
 	'orml-xcm-support/std',
 	"cumulus-primitives/std",
+	"xcm/std",
 ]
