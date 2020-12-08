@@ -48,8 +48,8 @@ impl Into<MultiLocation> for XCurrencyId {
 	}
 }
 
-pub trait Trait: frame_system::Trait {
-	type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
+pub trait Config: frame_system::Config {
+	type Event: From<Event<Self>> + Into<<Self as frame_system::Config>::Event>;
 
 	type Balance: Parameter + Member + AtLeast32BitUnsigned + Default + Copy + MaybeSerializeDeserialize + Into<u128>;
 
@@ -67,13 +67,13 @@ pub trait Trait: frame_system::Trait {
 }
 
 decl_storage! {
-	trait Store for Module<T: Trait> as XTokens {}
+	trait Store for Module<T: Config> as XTokens {}
 }
 
 decl_event! {
 	pub enum Event<T> where
-		<T as frame_system::Trait>::AccountId,
-		<T as Trait>::Balance,
+		<T as frame_system::Config>::AccountId,
+		<T as Config>::Balance,
 		XCurrencyId = XCurrencyId,
 		NetworkId = NetworkId,
 	{
@@ -86,7 +86,7 @@ decl_event! {
 }
 
 decl_module! {
-	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+	pub struct Module<T: Config> for enum Call where origin: T::Origin {
 		fn deposit_event() = default;
 
 		/// Transfer relay chain tokens to relay chain.
@@ -140,7 +140,7 @@ decl_module! {
 	}
 }
 
-impl<T: Trait> Module<T> {
+impl<T: Config> Module<T> {
 	fn do_transfer_to_relay_chain(dest: &T::AccountId, amount: T::Balance) -> Xcm {
 		Xcm::WithdrawAsset {
 			assets: vec![MultiAsset::ConcreteFungible {
