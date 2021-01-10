@@ -55,6 +55,22 @@ pub struct TokenInfo<AccountId, Data> {
 	pub data: Data,
 }
 
+pub trait OrmlNft<AccountId, ClassData, TokenData, ClassId, TokenId> {
+	/// Create NFT(non fungible token) class
+	fn create_class(owner: &AccountId, metadata: Vec<u8>, data: ClassData) -> Result<ClassId, DispatchError>;
+	/// Transfer NFT(non fungible token) from `from` account to `to` account
+	fn transfer(from: &AccountId, to: &AccountId, token: (ClassId, TokenId)) -> DispatchResult;
+	/// Mint NFT(non fungible token) to `owner`
+	fn mint(owner: &AccountId, class_id: ClassId, metadata: Vec<u8>, data: TokenData)
+		-> Result<TokenId, DispatchError>;
+	/// Burn NFT(non fungible token) from `owner`
+	fn burn(owner: &AccountId, token: (ClassId, TokenId)) -> DispatchResult;
+	/// Destroy NFT(non fungible token) class
+	fn destroy_class(owner: &AccountId, class_id: ClassId) -> DispatchResult;
+	/// Checks whether account is an owner of the provided token
+	fn is_owner(account: &AccountId, token: (ClassId, TokenId)) -> bool;
+}
+
 pub trait Config: frame_system::Config {
 	/// The class ID type
 	type ClassId: Parameter + Member + AtLeast32BitUnsigned + Default + Copy;
@@ -116,13 +132,8 @@ decl_module! {
 	}
 }
 
-impl<T: Config> Module<T> {
-	/// Create NFT(non fungible token) class
-	pub fn create_class(
-		owner: &T::AccountId,
-		metadata: Vec<u8>,
-		data: T::ClassData,
-	) -> Result<T::ClassId, DispatchError> {
+impl<T: Config> OrmlNft<T::AccountId, T::ClassData, T::TokenData, T::ClassId, T::TokenId> for Module<T> {
+	fn create_class(owner: &T::AccountId, metadata: Vec<u8>, data: T::ClassData) -> Result<T::ClassId, DispatchError> {
 		let class_id = NextClassId::<T>::try_mutate(|id| -> Result<T::ClassId, DispatchError> {
 			let current_id = *id;
 			*id = id.checked_add(&One::one()).ok_or(Error::<T>::NoAvailableClassId)?;
@@ -140,8 +151,7 @@ impl<T: Config> Module<T> {
 		Ok(class_id)
 	}
 
-	/// Transfer NFT(non fungible token) from `from` account to `to` account
-	pub fn transfer(from: &T::AccountId, to: &T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
+	fn transfer(from: &T::AccountId, to: &T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 		Tokens::<T>::try_mutate(token.0, token.1, |token_info| -> DispatchResult {
 			let mut info = token_info.as_mut().ok_or(Error::<T>::TokenNotFound)?;
 			ensure!(info.owner == *from, Error::<T>::NoPermission);
@@ -162,8 +172,7 @@ impl<T: Config> Module<T> {
 		})
 	}
 
-	/// Mint NFT(non fungible token) to `owner`
-	pub fn mint(
+	fn mint(
 		owner: &T::AccountId,
 		class_id: T::ClassId,
 		metadata: Vec<u8>,
@@ -195,8 +204,7 @@ impl<T: Config> Module<T> {
 		})
 	}
 
-	/// Burn NFT(non fungible token) from `owner`
-	pub fn burn(owner: &T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
+	fn burn(owner: &T::AccountId, token: (T::ClassId, T::TokenId)) -> DispatchResult {
 		Tokens::<T>::try_mutate_exists(token.0, token.1, |token_info| -> DispatchResult {
 			let t = token_info.take().ok_or(Error::<T>::TokenNotFound)?;
 			ensure!(t.owner == *owner, Error::<T>::NoPermission);
@@ -217,8 +225,7 @@ impl<T: Config> Module<T> {
 		})
 	}
 
-	/// Destroy NFT(non fungible token) class
-	pub fn destroy_class(owner: &T::AccountId, class_id: T::ClassId) -> DispatchResult {
+	fn destroy_class(owner: &T::AccountId, class_id: T::ClassId) -> DispatchResult {
 		Classes::<T>::try_mutate_exists(class_id, |class_info| -> DispatchResult {
 			let info = class_info.take().ok_or(Error::<T>::ClassNotFound)?;
 			ensure!(info.owner == *owner, Error::<T>::NoPermission);
@@ -230,7 +237,7 @@ impl<T: Config> Module<T> {
 		})
 	}
 
-	pub fn is_owner(account: &T::AccountId, token: (T::ClassId, T::TokenId)) -> bool {
+	fn is_owner(account: &T::AccountId, token: (T::ClassId, T::TokenId)) -> bool {
 		#[cfg(feature = "disable-tokens-by-owner")]
 		return Tokens::<T>::get(token.0, token.1).map_or(false, |token| token.owner == *account);
 
